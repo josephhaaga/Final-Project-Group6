@@ -1,9 +1,3 @@
-
-# coding: utf-8
-
-# In[1]:
-
-
 import torch
 import torchvision
 import numpy as np
@@ -15,15 +9,8 @@ import time
 import pandas as pd
 
 
-# In[2]:
-
-
 SVHN_train = torchvision.datasets.SVHN('~/ML2FinalProject/',split='train', download=True, transform=torchvision.transforms.ToTensor())
 SVHN_test = torchvision.datasets.SVHN('~/ML2FinalProject/', split='test', download=True, transform=torchvision.transforms.ToTensor())
-
-
-# In[3]:
-
 
 #Separate training into training and validation
 print(len(SVHN_train), len(SVHN_test))
@@ -37,11 +24,8 @@ train1 = [SVHN_train[i] for i in train1_indices]
 print(len(val), len(train1))
 
 
-# In[18]:
-
-
 def conv_train(train_data=SVHN_train, num_epochs=10, batch_size=100, val_data=None, validate=0):
-    start = time.time()
+    start = time.time() 
     criterion = torch.nn.CrossEntropyLoss()
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size)
     if validate==1:
@@ -99,22 +83,13 @@ def conv_train(train_data=SVHN_train, num_epochs=10, batch_size=100, val_data=No
     print str(t1) + ' seconds'
     if validate==1: 
         acc = acc.rename(columns={'Accuracy': 'Validation accuracy'}).merge(acc_train.rename(columns={'Accuracy': 'Training accuracy'}), on='Epoch').set_index('Epoch')
-        acc.plot(title='Training and validation accuracy')
+        #acc.plot(title='Training and validation accuracy')
         return acc 
-
-
-# In[5]:
-
 
 class Flatten(torch.nn.Module):
     def forward(self, input):
         return input.view(input.size(0), -1)
     
-
-
-# In[19]:
-
-
 model = torch.nn.Sequential(
         torch.nn.Conv2d(3,20,5),
         torch.nn.MaxPool2d(2, stride=2),
@@ -129,12 +104,10 @@ model = torch.nn.Sequential(
         torch.nn.Linear(500, 10), 
         torch.nn.LogSoftmax()
         ).cuda() 
+"""
 optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc = conv_train(train_data=train1, num_epochs=100, batch_size=1000, val_data=val, validate=1)
-
-
-# In[14]:
-
+acc = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
+"""
 
 def conv_test(batch_size=1000, testds=SVHN_test, report=0):
     model.eval()
@@ -155,42 +128,44 @@ def conv_test(batch_size=1000, testds=SVHN_test, report=0):
         print(classification_report(df['Actual'], df['Predicted']))
     print(accuracy_score(df['Actual'], df['Predicted']))
     return df
-
-
-# In[20]:
-
-
+"""
 ctest_dropout = conv_test(report=1)
+pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
+"""
 
+"""
+optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
+acc_nodropout = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
 
-# In[25]:
+ctest_nodropout = conv_test(report=1)
+pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
+"""
 
+model = torch.nn.Sequential(
+        torch.nn.Conv2d(3,20,5,padding=2),
+        torch.nn.MaxPool2d(2, stride=2),
+        torch.nn.ReLU(),
+        torch.nn.Conv2d(20,40,5,padding=2),
+        torch.nn.MaxPool2d(2, stride=2),
+        torch.nn.ReLU(),
+	torch.nn.Conv2d(40,40,5,padding=2),
+        torch.nn.MaxPool2d(2, stride=2),
+        torch.nn.ReLU(),
+	torch.nn.Dropout2d(0.30),
+        Flatten(),
+	torch.nn.Linear(640, 320), 
+        torch.nn.ReLU(),
+        torch.nn.Linear(320, 10), 
+        torch.nn.LogSoftmax()
+        ).cuda() 
+optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
+acc = conv_train(train_data=train1, num_epochs=100, batch_size=1000, val_data=val, validate=1)
+
+print("alpha=0.001, 0.3 dropout")
+ctest_dropout = conv_test(report=1)
 
 pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
 
 
-# In[21]:
 
-
-model = torch.nn.Sequential(
-        torch.nn.Conv2d(3,20,5),
-        torch.nn.MaxPool2d(2, stride=2),
-        torch.nn.ReLU(),
-        torch.nn.Conv2d(20,50,5),
-        torch.nn.MaxPool2d(2, stride=2),
-        torch.nn.ReLU(),
-        Flatten(),
-        torch.nn.Linear(1250, 500), 
-        torch.nn.ReLU(),
-        torch.nn.Linear(500, 10), 
-        torch.nn.LogSoftmax()
-        ).cuda() 
-optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc_nodropout = conv_train(train_data=train1, num_epochs=100, batch_size=1000, val_data=val, validate=1)
-
-
-# In[22]:
-
-
-ctest_nodropout = conv_test(report=1)
 
