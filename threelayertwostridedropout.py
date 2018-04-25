@@ -89,25 +89,6 @@ def conv_train(train_data=SVHN_train, num_epochs=10, batch_size=100, val_data=No
 class Flatten(torch.nn.Module):
     def forward(self, input):
         return input.view(input.size(0), -1)
-    
-model = torch.nn.Sequential(
-        torch.nn.Conv2d(3,20,5),
-        torch.nn.MaxPool2d(2, stride=2),
-        torch.nn.ReLU(),
-        torch.nn.Conv2d(20,50,5),
-        torch.nn.MaxPool2d(2, stride=2),
-        torch.nn.ReLU(),
-        torch.nn.Dropout2d(0.25),
-        Flatten(),
-        torch.nn.Linear(1250, 500), 
-        torch.nn.ReLU(),
-        torch.nn.Linear(500, 10), 
-        torch.nn.LogSoftmax()
-        ).cuda() 
-"""
-optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
-"""
 
 def conv_test(batch_size=1000, testds=SVHN_test, report=0):
     model.eval()
@@ -128,18 +109,6 @@ def conv_test(batch_size=1000, testds=SVHN_test, report=0):
         print(classification_report(df['Actual'], df['Predicted']))
     print(accuracy_score(df['Actual'], df['Predicted']))
     return df
-"""
-ctest_dropout = conv_test(report=1)
-pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
-"""
-
-"""
-optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc_nodropout = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
-
-ctest_nodropout = conv_test(report=1)
-pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
-"""
 
 model = torch.nn.Sequential(
         torch.nn.Conv2d(3,20,5,padding=2),
