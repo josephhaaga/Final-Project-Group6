@@ -104,10 +104,7 @@ model = torch.nn.Sequential(
         torch.nn.Linear(500, 10), 
         torch.nn.LogSoftmax()
         ).cuda() 
-"""
-optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
-"""
+
 
 def conv_test(batch_size=1000, testds=SVHN_test, report=0):
     model.eval()
@@ -128,18 +125,6 @@ def conv_test(batch_size=1000, testds=SVHN_test, report=0):
         print(classification_report(df['Actual'], df['Predicted']))
     print(accuracy_score(df['Actual'], df['Predicted']))
     return df
-"""
-ctest_dropout = conv_test(report=1)
-pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
-"""
-
-"""
-optimizer =torch.optim.Adam(model.parameters(),lr=0.001)
-acc_nodropout = conv_train(train_data=train1, num_epochs=10, batch_size=1000, val_data=val, validate=1)
-
-ctest_nodropout = conv_test(report=1)
-pd.crosstab(ctest_dropout['Actual'], ctest_dropout['Predicted'])
-"""
 
 dropout_values = np.arange(0.2,0.5,0.01)
 
